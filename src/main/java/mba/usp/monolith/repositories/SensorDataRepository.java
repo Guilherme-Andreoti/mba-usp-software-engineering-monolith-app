@@ -1,6 +1,6 @@
-package mba.usp.monolith.domain.repositories;
+package mba.usp.monolith.repositories;
 
-import mba.usp.monolith.processing.SensorData;
+import mba.usp.monolith.models.SensorData;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

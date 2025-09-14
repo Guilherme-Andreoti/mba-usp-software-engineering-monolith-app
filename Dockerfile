@@ -1,14 +1,38 @@
-# Usar uma imagem base do OpenJDK
-FROM openjdk:24-jdk-slim
+# Stage 1: Build the application
+# Use a specific, stable JDK version to build the project.
+FROM eclipse-temurin:23-jdk as builder
 
-# Definir o diretório de trabalho
+# Set the working directory inside the container.
 WORKDIR /app
 
-# Copiar o arquivo JAR da aplicação para dentro do container
-COPY build/libs/Monolith-0.0.1-SNAPSHOT.jar my-app.jar
+# Copy only the necessary build files first to leverage Docker's build cache.
+COPY gradlew .
+COPY gradle ./gradle
+COPY build.gradle .
+COPY settings.gradle .
 
-# Expor a porta do Spring Boot (por padrão 8080)
-EXPOSE 8080
+# Copy the source code last, as it changes most frequently.
+COPY src ./src
 
-# Comando para rodar a aplicação Spring Boot
-ENTRYPOINT ["java", "-jar", "my-app.jar"]
+# Make the Gradle wrapper executable and run the clean build.
+RUN chmod +x ./gradlew && ./gradlew clean build -x test
+
+# Stage 2: Create the final, lightweight runtime image
+# Use a JRE-only base image for a smaller and more secure final image.
+FROM eclipse-temurin:23-jre-alpine
+
+# Create a non-root user for enhanced security.
+RUN addgroup --system spring && adduser --system --ingroup spring spring
+USER spring:spring
+
+# Set the working directory for the runtime.
+WORKDIR /app
+
+# Copy the built JAR file from the 'builder' stage.
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Expose the application port.
+EXPOSE 5004
+
+# Define the command to run the application.
+ENTRYPOINT ["java", "-jar", "app.jar"]

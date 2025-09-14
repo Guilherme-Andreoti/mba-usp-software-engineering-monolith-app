@@ -1,25 +1,30 @@
-package mba.usp.monolith.ingestion.mqtt;
+package mba.usp.monolith.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mba.usp.monolith.processing.SensorData;
-import mba.usp.monolith.processing.ProcessingService;
+import mba.usp.monolith.models.SensorData;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 @Service
-public class MqttMessageHandler {
+public class MqttReceiverService {
 
     private final ObjectMapper objectMapper;
     private final ProcessingService processor;
 
-    public MqttMessageHandler(ObjectMapper objectMapper, ProcessingService processor) {
+    public MqttReceiverService(ObjectMapper objectMapper, ProcessingService processor) {
         this.objectMapper = objectMapper;
         this.processor = processor;
     }
 
-    public void handleMessage(String topic, MqttMessage message) {
+    public void  handleMessage(String topic, MqttMessage message) {
         try {
             String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
             if (payload.isBlank()) {

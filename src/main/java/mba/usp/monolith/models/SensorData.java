@@ -1,4 +1,4 @@
-package mba.usp.monolith.processing;
+package mba.usp.monolith.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 
-@Document(collection = "sensor_data")
+@Document(collection = "monolith")
 public class SensorData {
 
     @Id

@@ -1,4 +1,4 @@
-package mba.usp.monolith.processing;
+package mba.usp.monolith.models;
 
 public class SoundData {
     private double high;
