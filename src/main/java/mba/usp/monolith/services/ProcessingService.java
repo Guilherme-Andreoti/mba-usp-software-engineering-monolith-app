@@ -2,12 +2,14 @@ package mba.usp.monolith.services;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import mba.usp.monolith.dtos.Notification;
 import mba.usp.monolith.models.SensorData;
 import mba.usp.monolith.repositories.SensorDataRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ProcessingService {
@@ -15,6 +17,7 @@ public class ProcessingService {
     private final SensorDataRepository repository;
     private final NotificationHandler notificationHandler;
     private final Counter persistedRecordsCounter;
+    private final Timer processingTime;
 
 
 
@@ -25,6 +28,10 @@ public class ProcessingService {
         this.persistedRecordsCounter = Counter.builder("persisted_records")
                 .tag("service","monolith")
                 .description("Number of records persisted")
+                .register(registry);
+        this.processingTime = Timer.builder("processing_time")
+                .tag("service","monolith")
+                .description("Time taken to process MQTT messages")
                 .register(registry);
     }
 
@@ -43,5 +50,7 @@ public class ProcessingService {
         repository.save(data);
 
         persistedRecordsCounter.increment();
+
+        processingTime.record(System.currentTimeMillis() - data.getStartProcessingTimestamp(), TimeUnit.MILLISECONDS);
     }
 }

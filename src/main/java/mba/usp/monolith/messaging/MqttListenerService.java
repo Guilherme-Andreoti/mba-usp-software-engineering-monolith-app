@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 public class MqttListenerService {
     private final MqttClient mqttClient;
     private final Counter messageCounter;
-    private final Timer processingTime;
     private final MqttReceiverService mqttReceiverService;
 
 
@@ -23,23 +22,18 @@ public class MqttListenerService {
         this.messageCounter = Counter.builder("mqtt_messages_received")
                 .description("Number of MQTT messages received")
                 .register(registry);
-        this.processingTime = Timer.builder("processing_time")
-                .tag("service","monolith")
-                .description("Time taken to process MQTT messages")
-                .register(registry);
+
         this.mqttReceiverService = mqttReceiverService;
     }
 
     @PostConstruct
     public void subscribe() throws Exception {
         mqttClient.subscribe("#", (topic, message) -> {
-            long start = System.currentTimeMillis();
             String payload = new String(message.getPayload());
             messageCounter.increment();
 
             mqttReceiverService.handleMessage(topic,message);
 
-            processingTime.record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
         });
     }
 }

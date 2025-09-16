@@ -1,5 +1,6 @@
 package mba.usp.monolith.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -10,7 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MqttConfig {
 
-    private static final String BROKER_URL = "tcp://host.docker.internal:1883"; 
+    @Value("${mqtt.broker.url}")
+    private String BROKER_URL;
     private static final String CLIENT_ID = "monolith-client";
 
     public MqttConfig() {
